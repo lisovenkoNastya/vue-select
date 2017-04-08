@@ -491,6 +491,15 @@
        */
       inputId: {
         type: String
+      },
+
+      /**
+       * Enable/disable filtering the options by vue-select component.
+       * @type {Boolean}
+       */
+      filterable: {
+        type: Boolean,
+        default: true
       }
     },
 
@@ -798,16 +807,21 @@
        * @return {array}
        */
       filteredOptions() {
-        let options = this.mutableOptions.filter((option) => {
-          if (typeof option === 'object' && option.hasOwnProperty(this.label)) {
-            return option[this.label].toLowerCase().indexOf(this.search.toLowerCase()) > -1
-          } else if (typeof option === 'object' && !option.hasOwnProperty(this.label)) {
-            return console.warn(`[vue-select warn]: Label key "option.${this.label}" does not exist in options object.\nhttp://sagalbot.github.io/vue-select/#ex-labels`)
+        let options
+        if (this.filterable) {
+          options = this.mutableOptions.filter((option) => {
+            if (typeof option === 'object' && option.hasOwnProperty(this.label)) {
+              return option[this.label].toLowerCase().indexOf(this.search.toLowerCase()) > -1
+            } else if (typeof option === 'object' && !option.hasOwnProperty(this.label)) {
+              return console.warn(`[vue-select warn]: Label key "option.${this.label}" does not exist in options object.\nhttp://sagalbot.github.io/vue-select/#ex-labels`)
+            }
+            return option.toLowerCase().indexOf(this.search.toLowerCase()) > -1
+          })
+          if (this.taggable && this.search.length && !this.optionExists(this.search)) {
+            options.unshift(this.search)
           }
-          return option.toLowerCase().indexOf(this.search.toLowerCase()) > -1
-        })
-        if (this.taggable && this.search.length && !this.optionExists(this.search)) {
-          options.unshift(this.search)
+        } else {
+          options = this.mutableOptions
         }
         return options
       },
